@@ -5,3 +5,4 @@ django
 djangorestframework_simplejwt
 psycopg2-binary
 dj-config-url
+django_filter
