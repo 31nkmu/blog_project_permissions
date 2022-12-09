@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'drf_yasg',
 
     # apps
     'applications.account',
@@ -143,4 +144,15 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated'
     # ], # По умолчанию AllowAny
+}
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+        }
+    }
 }

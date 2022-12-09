@@ -28,7 +28,6 @@ class Post(models.Model):
         ordering = ['-id']
 
     def save(self, *args, **kwargs):
-        print(self.title)
 
         return super().save(*args, **kwargs)
 

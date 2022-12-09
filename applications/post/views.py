@@ -1,15 +1,16 @@
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet, GenericViewSet
 from rest_framework import permissions
 
-from applications.post.models import Post, Category
-from applications.post.permissions import IsOwner
-from applications.post.serializers import PostSerializer
+from applications.post.models import Post, Category, Comment
+from applications.post.permissions import IsOwner, IsCommentOwner
+from applications.post.serializers import PostSerializer, CategorySerializer, CommentSerializer
 
 
 # class PostApiView(ViewSet):
@@ -40,6 +41,7 @@ class PostApiView(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category', 'owner']
     search_fields = ['title', 'description']
+
     # ordering_fields = ['id']
 
     def perform_create(self, serializer):
@@ -52,3 +54,27 @@ class PostApiView(ModelViewSet):
     #         queryset = queryset.filter(category=category)
     #         return queryset
     #     return None
+
+
+class CategoryApiView(mixins.CreateModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin,
+                      GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class CommentApiView(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsCommentOwner]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        owner = self.request.user.id
+        queryset = super().get_queryset()
+        res = queryset.filter(owner=owner)
+        return res
