@@ -1,12 +1,27 @@
 from django.contrib import admin
 
-from applications.post.models import Post, Comment, Category
+from applications.post.models import Post, Comment, Category, Rating, Like, Image
 
 
-class AdminPost(admin.ModelAdmin):
-    pass
+class ImageAdmin(admin.TabularInline):
+    model = Image
+    fields = ('image',)
+    max_num = 10
 
 
-admin.site.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    inlines = [
+        ImageAdmin
+    ]
+    list_display = ['title', 'likes']
+
+    @staticmethod
+    def likes(obj):
+        return obj.likes.filter(like=True).count()
+
+
+admin.site.register(Post, PostAdmin)
 admin.site.register(Comment)
 admin.site.register(Category)
+admin.site.register(Like)
+admin.site.register(Rating)
